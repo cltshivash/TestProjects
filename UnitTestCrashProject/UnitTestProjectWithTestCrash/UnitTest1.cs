@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace UnitTestProjectWithTestCrash
@@ -9,6 +10,19 @@ namespace UnitTestProjectWithTestCrash
         [TestMethod]
         public void TestMethod1()
         {
+            Thread.Sleep(500);
+        }
+
+        [TestMethod]
+        public void TestMethod10()
+        {
+            Thread.Sleep(600);
+        }
+
+        [TestMethod]
+        public void TestMethod2()
+        {
+            Thread.Sleep(100);
             Environment.Exit(255);
         }
     }
