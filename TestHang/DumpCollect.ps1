@@ -25,9 +25,14 @@ try
 	
 	if (![System.IO.File]::Exists($waitEnabledPath)) {
 		
-		Write-Host "Wait for process"
-		"Wait for process" | Out-File $waitEnabledPath
+		# Install procdump
+		iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+		choco install procdump
 		
+		# Setup the next pass to capture dumps...
+		"Enabling waiting for timeout to expire" | Out-File $waitEnabledPath
+		
+		# Create the params to be passed..
 		[string[]] $params = @('-File') + $MyInvocation.MyCommand.Path
 
 		Write-Host "TEMP Location :" $Destination
