@@ -1,17 +1,17 @@
 [CmdletBinding()]
 param (
-    [Parameter(Position=0)]
-    [ValidateNotNullOrEmpty()]
-    [string[]] $ProcessName = @('testhost*'),
+	[Parameter(Position=0)]
+	[ValidateNotNullOrEmpty()]
+	[string[]] $ProcessName = @('testhost*'),
 
-    [Parameter()]
-    [ValidateNotNullOrEmpty()]
-    [timespan] $Timeout = '00:01:00'
+	[Parameter()]
+	[ValidateNotNullOrEmpty()]
+	[timespan] $Timeout = '00:01:00'
 )
 
 try
 {
-    $Destination = (join-path $env:TEMP "TestHangDumps")
+	$Destination = (join-path $env:TEMP "TestHangDumps")
 	Write-Host "Timeout : " $Timeout
 	if (!(Test-Path $Destination)) {
 		$null = New-Item -Path $Destination -ItemType Directory
@@ -63,7 +63,7 @@ try
 	}
 }
 catch {
-    # Write error and continue processing
+	# Write error and continue processing
 	"Error: $_" | Out-File $log -Append
 	
 }
