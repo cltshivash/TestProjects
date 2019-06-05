@@ -6,7 +6,7 @@ param (
 
     [Parameter()]
     [ValidateNotNullOrEmpty()]
-    [string] $Destination = (join-path $(Agent.TempDirectory) "TestHangDumps"),
+    [string] $Destination = (join-path $env:TEMP "TestHangDumps"),
 
     [Parameter()]
     [ValidateNotNullOrEmpty()]
