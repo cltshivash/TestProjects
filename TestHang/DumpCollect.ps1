@@ -8,6 +8,25 @@ try
 	# Create the log path
 	$log = Join-Path $Destination ('dmp_{0}.log' -f [Guid]::NewGuid())
 	
+	# Parsing the inputs ahead for loggging purpose..
+	$TimeoutInMinutes=[int]$env:TimeoutInMinutes
+	if ($TimeoutInMinutes -le 0)
+	{
+		Write-Host "*********** Defaulting timeout to 30 minutes *********************"
+		$TimeoutInMinutes=30
+	}
+	
+	Write-Host "Timeout (Minutes) : " $TimeoutInMinutes
+	
+	$processNamesString=$env:ProcessNamesToTrack;
+	if ([string]::IsNullOrEmpty($processNamesString)) {
+		Write-Host "*********** Defaulting the processes to track *********************"
+		$processNamesString="testhost*,vstest.console*,dotnet*"
+	}
+	
+	Write-Host "ProcessNamesToTrack : " $processNamesString
+    $ProcessNames = $processNamesString.split(",")
+	
 	# File that serves to indicate whether to wait or not..
 	$waitEnabledPath = Join-Path $Destination '.waitfortargetprocess'
 	
@@ -31,27 +50,11 @@ try
 		return
 	}
 	
-	$TimeoutInMinutes=[int]$env:TimeoutInMinutes
-	if ($TimeoutInMinutes -le 0)
-	{
-		Write-Host "*********** Defaulting timeout to 30 minutes *********************"
-		$TimeoutInMinutes=30
-	}
 	
-	Write-Host "Timeout (Minutes) : " $TimeoutInMinutes
-	
-	$processNamesString=$env:ProcessNamesToTrack;
-	if ([string]::IsNullOrEmpty($processNamesString)) {
-		Write-Host "*********** Defaulting the processes to track *********************"
-		$processNamesString="testhost*,vstest.console*,dotnet*"
-	}
-	
-	Write-Host "ProcessNamesToTrack : " $processNamesString
-    $ProcessNames = $processNamesString.split(",")
 	
 	"Waiting for $TimeoutInMinutes minutes before creating dumps for process(es): $ProcessNames" | Out-File $log -Append
 	Write-Host "Waiting for $TimeoutInMinutes minutes before creating dumps for process(es): $ProcessNames"
-	#Start-Sleep -Seconds ($TimeoutInMinutes*60)
+	Start-Sleep -Seconds ($TimeoutInMinutes*60)
 	
 	"Checking for process(es): $ProcessNames" | Out-File $log
 	$processesToTerminate = @()
