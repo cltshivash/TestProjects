@@ -6,7 +6,7 @@ param (
 
     [Parameter()]
     [ValidateNotNullOrEmpty()]
-    [timespan] $Timeout = '00:0:30'
+    [timespan] $Timeout = '00:01:00'
 )
 
 try
