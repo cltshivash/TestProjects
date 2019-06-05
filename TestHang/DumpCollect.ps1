@@ -32,9 +32,7 @@ try
 		Write-Host "Invoking with Wait..."
 		"Invoking with Wait..." | Out-File $log
 		Write-Host "TEMP Location :" $Destination
-		"TEMP Location :" $Destination  | Out-File $log
 		Write-Host $params
-		$params | Out-File $log
 		Start-Process -FilePath "${env:WINDIR}\System32\WindowsPowerShell\v1.0\powershell.exe" -ArgumentList $params
 		Start-Sleep -Milliseconds 10000
 		Write-Host "Ending..."
