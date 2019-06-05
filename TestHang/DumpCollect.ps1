@@ -2,22 +2,16 @@
 param (
     [Parameter(Position=0)]
     [ValidateNotNullOrEmpty()]
-    [string[]] $ProcessName = @('vstest.executionengine*', 'testhost*'),
+    [string[]] $ProcessName = @('testhost*'),
 
     [Parameter()]
     [ValidateNotNullOrEmpty()]
-    [string] $Destination = (join-path $env:TEMP "TestHangDumps"),
-
-    [Parameter()]
-    [ValidateNotNullOrEmpty()]
-    [timespan] $Timeout = '00:01:00',
-
-    [Parameter()]
-    [switch] $Wait
+    [timespan] $Timeout = '00:0:30'
 )
 
 try
 {
+    $Destination = (join-path $env:TEMP "TestHangDumps")
 	Write-Host "Timeout : " $Timeout
 	if (!(Test-Path $Destination)) {
 		$null = New-Item -Path $Destination -ItemType Directory
@@ -50,25 +44,22 @@ try
 	
 	"Checking for process(es): $ProcessName" | Out-File $log
 	Get-Process -Name $ProcessName | ForEach-Object {
-		$path = Join-Path $Destination ('{0}_{1}.dmp' -f $_.Name, $_.Id)
-		"Writing dump for process: $($_.Name), path: $path" | Out-File $log -Append
-
+		
 		try {
-			
 			procdump -s 5 -n 2 -accepteula $_.Id $Destination
-			"Successfully wrote dump: $path" | Out-File $log -Append
+			"Successfully wrote dump" | Out-File $log -Append
 
 			# Attempt to kill the process to free any file locks.
 			$_ | Stop-Process
 		}
 		catch {
-			"Error: Failed to write dump: $path, error: $_" | Out-File $log -Append
+			"Error: Failed to write dump: error: $_" | Out-File $log -Append
 		}
 	}
 }
 catch {
     # Write error and continue processing
-	"Error: Failed to write dump: $path, error: $_" | Out-File $log -Append
+	"Error: $_" | Out-File $log -Append
 	
 }
 
