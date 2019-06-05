@@ -1,18 +1,6 @@
-[CmdletBinding()]
-param (
-	[Parameter(Position=0)]
-	[ValidateNotNullOrEmpty()]
-	[string[]] $ProcessName = @('testhost*'),
-
-	[Parameter()]
-	[ValidateNotNullOrEmpty()]
-	[timespan] $Timeout = '00:01:00'
-)
-
 try
 {
 	$Destination = (join-path $env:TEMP "TestHangDumps")
-	Write-Host "Timeout : " $Timeout
 	if (!(Test-Path $Destination)) {
 		$null = New-Item -Path $Destination -ItemType Directory
 	}
@@ -30,7 +18,7 @@ try
 		choco install procdump
 		
 		# Setup the next pass to capture dumps...
-		"Enabling waiting for timeout to expire" | Out-File $waitEnabledPath
+		"Enabling the wait for timeout to expire" | Out-File $waitEnabledPath
 		
 		# Create the params to be passed..
 		[string[]] $params = @('-File') + $MyInvocation.MyCommand.Path
@@ -43,32 +31,64 @@ try
 		return
 	}
 	
-	"Waiting for $Timeout before creating dumps for process(es): $ProcessName" | Out-File $log -Append
-	Write-Host "Waiting for $Timeout before creating dumps for process(es): $ProcessName"
-	Start-Sleep -Milliseconds $Timeout.TotalMilliseconds
+	$TimeoutInMinutes=[int]$env:TimeoutInMinutes
+	if ($TimeoutInMinutes -le 0)
+	{
+		Write-Host "*********** Defaulting timeout to 30 minutes *********************"
+		$TimeoutInMinutes=30
+	}
 	
-	"Checking for process(es): $ProcessName" | Out-File $log
-	Get-Process -Name $ProcessName | ForEach-Object {
+	Write-Host "Timeout (Minutes) : " $TimeoutInMinutes
+	
+	$processNamesString=$env:ProcessNamesToTrack;
+	if ([string]::IsNullOrEmpty($processNamesString)) {
+		Write-Host "*********** Defaulting the processes to track *********************"
+		$processNamesString="testhost*,vstest.console*,dotnet*"
+	}
+	
+	Write-Host "ProcessNamesToTrack : " $processNamesString
+    $ProcessNames = $processNamesString.split(",")
+	
+	"Waiting for $TimeoutInMinutes minutes before creating dumps for process(es): $ProcessNames" | Out-File $log -Append
+	Write-Host "Waiting for $TimeoutInMinutes minutes before creating dumps for process(es): $ProcessNames"
+	#Start-Sleep -Seconds ($TimeoutInMinutes*60)
+	
+	"Checking for process(es): $ProcessNames" | Out-File $log
+	$processesToTerminate = @()
+	Get-Process -Name $ProcessNames | ForEach-Object {
 		
 		try {
+			# Collect the dump..
 			procdump -s 5 -n 2 -accepteula $_.Id $Destination
 			"Successfully wrote dump" | Out-File $log -Append
 
-			# Attempt to kill the process to free any file locks.
-			$_ | Stop-Process
+			# Add the process to be terminated later..
+			$processesToTerminate+=$_.Id
+			
 		}
 		catch {
 			"Error: Failed to write dump: error: $_" | Out-File $log -Append
+		}
+	}
+	
+	foreach ($processId in $processesToTerminate) {
+		try {
+			# Attempt to kill the process to free any file locks.
+			# $_ | Stop-Process
+			Stop-Process -Id $processId
+		}
+		catch {
+			"Error: Failed to terminate process : $processId" | Out-File $log -Append
 		}
 	}
 }
 catch {
 	# Write error and continue processing
 	"Error: $_" | Out-File $log -Append
-	
+	Write-Host "Error: $_"
 }
 
+#Cleanup the tracking file at the end...
 if ([System.IO.File]::Exists($waitEnabledPath)) {
 	[System.IO.File]::Delete($waitEnabledPath)
 }
-
