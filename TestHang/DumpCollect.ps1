@@ -18,6 +18,7 @@ param (
 
 try
 {
+	Write-Host "Timeout : " $Timeout
 	if (!(Test-Path $Destination)) {
 		$null = New-Item -Path $Destination -ItemType Directory
 	}
