@@ -6,36 +6,41 @@ param (
 
     [Parameter()]
     [ValidateNotNullOrEmpty()]
-    [string] $Destination = (join-path $env:TEMP "TestHangDumps"),
+    [string] $Destination = (join-path $(Agent.TempDirectory) "TestHangDumps"),
 
     [Parameter()]
     [ValidateNotNullOrEmpty()]
-    [timespan] $Timeout = '00:00:10',
+    [timespan] $Timeout = '00:01:00',
 
     [Parameter()]
     [switch] $Wait
 )
-
-# Do not block the current process unless -Wait is passed.
-if (!$Wait) {
-    
-    [string[]] $params = @('-File') + $MyInvocation.MyCommand.Path
-    $params += '-Wait'
-
-    Write-Host "Invoking with Wait..."
-	Write-Host "TEMP Location :" $Destination
-    Write-Host $params
-    Start-Process -FilePath "${env:WINDIR}\System32\WindowsPowerShell\v1.0\powershell.exe" -ArgumentList $params
-    return
-}
 
 try
 {
 	if (!(Test-Path $Destination)) {
 		$null = New-Item -Path $Destination -ItemType Directory
 	}
-
 	$log = Join-Path $Destination ('dmp_{0}.log' -f [Guid]::NewGuid())
+	
+	# Do not block the current process unless -Wait is passed.
+	if (!$Wait) {
+		
+		[string[]] $params = @('-File') + $MyInvocation.MyCommand.Path
+		$params += '-Wait'
+
+		Write-Host "Invoking with Wait..."
+		"Invoking with Wait..." | Out-File $log
+		Write-Host "TEMP Location :" $Destination
+		"TEMP Location :" $Destination  | Out-File $log
+		Write-Host $params
+		$params | Out-File $log
+		Start-Process -FilePath "${env:WINDIR}\System32\WindowsPowerShell\v1.0\powershell.exe" -ArgumentList $params
+		Start-Sleep -Milliseconds 10000
+		Write-Host "Ending..."
+		return
+	}
+	
 	"Waiting for $Timeout before creating dumps for process(es): $ProcessName" | Out-File $log
 	Start-Sleep -Milliseconds $Timeout.TotalMilliseconds
 
