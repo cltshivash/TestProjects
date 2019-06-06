@@ -1,6 +1,6 @@
 try
 {
-	$Destination = (join-path $env:TEMP "TestHangDumps")
+	$Destination = (join-path $env:Agent_TempDirectory "TestHangDumps")
 	if (!(Test-Path $Destination)) {
 		$null = New-Item -Path $Destination -ItemType Directory
 	}
@@ -49,8 +49,6 @@ try
 		Write-Host "Ending..."
 		return
 	}
-	
-	
 	
 	"Waiting for $TimeoutInMinutes minutes before creating dumps for process(es): $ProcessNames" | Out-File $log -Append
 	Write-Host "Waiting for $TimeoutInMinutes minutes before creating dumps for process(es): $ProcessNames"

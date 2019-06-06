@@ -1,4 +1,4 @@
-$Destination = (join-path $env:TEMP "TestHangDumps")
+$Destination = (join-path $env:Agent_TempDirectory "TestHangDumps")
 Get-ChildItem $Destination -Filter *.dmp | 
 Foreach-Object {
     $path=$_.FullName
