@@ -45,7 +45,6 @@ try
 		Write-Host "TEMP Location :" $Destination
 		Write-Host "Parameters for the invocation : " $params
 
-		Start-Sleep -Seconds 20
 		Start-Process -FilePath "${env:WINDIR}\System32\WindowsPowerShell\v1.0\powershell.exe" -ArgumentList $params
 		Write-Host "Ending..."
 		return
