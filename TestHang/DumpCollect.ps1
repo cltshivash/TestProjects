@@ -34,7 +34,7 @@ try
 		
 		# Install procdump
 		iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-		choco install procdump
+		choco install procdump -y
 		
 		# Setup the next pass to capture dumps...
 		"Enabling the wait for timeout to expire" | Out-File $waitEnabledPath
@@ -45,6 +45,7 @@ try
 		Write-Host "TEMP Location :" $Destination
 		Write-Host "Parameters for the invocation : " $params
 
+		Start-Sleep -Seconds 20
 		Start-Process -FilePath "${env:WINDIR}\System32\WindowsPowerShell\v1.0\powershell.exe" -ArgumentList $params
 		Write-Host "Ending..."
 		return
