@@ -34,7 +34,7 @@ try
 		
 		# Install procdump
 		iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-		choco install procdump -y
+		choco install -y procdump
 		
 		# Setup the next pass to capture dumps...
 		"Enabling the wait for timeout to expire" | Out-File $waitEnabledPath
