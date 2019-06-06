@@ -11,12 +11,12 @@
       
       `ProcessNamesToTrack <comma separated processe names to collect dumps for.`
       
-      ` Recommended value : testhost*,dotnet*,vstest.console*`
+      `Recommended value : testhost*,dotnet*,vstest.console*`
 - Add a powershell task after your test task 
     -  The task script contents would be inline.
     
-        `$scripLocation='https://raw.githubusercontent.com/cltshivash/TestProjects/master/TestHang/UploadDumpFiles.ps1'`
+       `$scripLocation='https://raw.githubusercontent.com/cltshivash/TestProjects/master/TestHang/UploadDumpFiles.ps1'`
         
-        `iex ((New-Object System.Net.WebClient).DownloadString($scripLocation))`
+       `iex ((New-Object System.Net.WebClient).DownloadString($scripLocation))`
         
     - Ensure that under control options select "Even if a previous task has failed, unless the build was canceled"
