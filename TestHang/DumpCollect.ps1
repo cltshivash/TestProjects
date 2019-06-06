@@ -60,7 +60,7 @@ try
 		
 		try {
 			# Collect the dump..
-			procdump -s 5 -n 2 -accepteula $_.Id $Destination
+			procdump -s 15 -n 2 -accepteula $_.Id $Destination
 			"Successfully wrote dump" | Out-File $log -Append
 
 			# Add the process to be terminated later..
