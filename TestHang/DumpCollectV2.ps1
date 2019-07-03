@@ -16,7 +16,7 @@ try
         $TimeoutInMinutes=30
     }
     
-    Write-Host "Timeout (Minutes) : " $TimeoutInMinutes
+	Write-Host "Timeout (Minutes) : " $TimeoutInMinutes
     
     $processNamesString=$env:ProcessNamesToTrack;
     if ([string]::IsNullOrEmpty($processNamesString)) {
@@ -32,10 +32,7 @@ try
     $procdumpPath = Join-Path $Destination 'procdump.exe'
     if (![System.IO.File]::Exists($waitEnabledPath)) {
         
-        # Install procdump
-        # iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-        # choco install -y procdump
-		# Download procdump
+        # Download procdump
 		Invoke-WebRequest -Uri "https://raw.githubusercontent.com/cltshivash/TestProjects/master/TestHang/procdump.exe" -OutFile $procdumpPath
 
         # Setup the next pass to capture dumps...
@@ -59,23 +56,23 @@ try
     "Checking for process(es): $ProcessNames" | Out-File $log
     $processesToTerminate = @()
     Get-Process -Name $ProcessNames | ForEach-Object {
-        
         try {
-            # Collect the dump..
-			# procdump -s 15 -n 2 -accepteula $_.Id $Destination
-
-			# Create the params to be passed..
+            # Create the params to be passed..
 			[string[]] $procDumpParams = @('-s', '15', '-n', '2', '-accepteula') + $_.Id + $Destination
-			Write-Host "Parameters for the invocation : " $$procDumpParams
+			Write-Host "Procdumppath : " $procdumpPath
+			Write-Host "Parameters for the invocation : " $procDumpParams
 
-			Start-Process -FilePath ${procdumpPath} -ArgumentList $procDumpParams
-            "Successfully wrote dump" | Out-File $log -Append
+			$process = Start-Process -FilePath $procdumpPath -ArgumentList $procDumpParams -Wait 
+			Write-Host "Process Exit code" $process.ExitCode
+			
+			"Successfully wrote dump" | Out-File $log -Append
 
             # Add the process to be terminated later..
             $processesToTerminate+=$_.Id
         }
         catch {
             "Error: Failed to write dump: error: $_" | Out-File $log -Append
+			Write-Host "Error: Failed to write dump: error: $_"
         }
     }
     
@@ -87,6 +84,7 @@ try
         }
         catch {
             "Error: Failed to terminate process : $processId" | Out-File $log -Append
+			Write-Host "Error: Failed to terminate process : $processId"
         }
     }
 }
