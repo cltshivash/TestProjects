@@ -1,5 +1,4 @@
 ## Collect Dumps (mini) to debug hangs in pipeline
-- NOTE: The pipeline agent needs to running under admin privileges
 - Step 1: Dump Collection Monitor Start
      - Add a powershell task before your test task (to start monitoring for dump collection)
      -  The task script contents would be inline.
